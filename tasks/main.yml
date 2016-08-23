@@ -1,0 +1,6 @@
+---
+
+- include: debian.yml
+  when: "ansible_distribution == 'Debian'"
+  tags:
+    - docker

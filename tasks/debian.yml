@@ -1,0 +1,13 @@
+---
+
+- name: Add docker.io repo
+  apt_repository: repo='deb https://apt.dockerproject.org/repo debian-jessie main' state=present
+
+- name: Install docker
+  apt: name=docker-engine update_cache=yes state=installed force=yes
+
+- name: Remove docker rc
+  file: path=/etc/init.d/docker state=absent
+
+- name: Create folder for containers logs
+  file: path=/var/log/containers/ state=directory
