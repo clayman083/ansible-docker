@@ -1,5 +1,12 @@
 ---
 
+- name: Install required packages
+  apt: name={{ item }} update_cache=yes state=installed force=yes
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - openssl
+
 - name: Add docker.io repo
   apt_repository: repo='deb https://apt.dockerproject.org/repo debian-jessie main' state=present
 
@@ -11,3 +18,12 @@
 
 - name: Create folder for containers logs
   file: path=/var/log/containers/ state=directory
+
+- name: Install python library
+  pip: name=docker-py version=1.9.0
+
+- include: certs.yml
+
+- name: Create systemd config
+  template: src=docker.service.j2 dest=/etc/systemd/system/docker.service mode=0644
+  notify: "restart docker service"

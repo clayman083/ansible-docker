@@ -1,0 +1,36 @@
+---
+
+- name: Generate private keys
+  shell: openssl genrsa -out {{ item }}.pem 4096 chdir=/etc/docker creates={{ item }}.pem
+  with_items:
+    - ca-key
+    - server-key
+    - client-key
+
+- name: Generate CA public key
+  shell: openssl req -new -x509 -days 365 -key ca-key.pem -sha256 -out ca.pem -subj "/CN={{ inventory_hostname }}" chdir=/etc/docker creates=ca.pem
+
+- name: Generate server csr
+  shell: openssl req -subj "/CN={{ inventory_hostname }}" -sha256 -new -key server-key.pem -out server.csr chdir=/etc/docker creates=server.csr
+
+- name: Prepare extfile for certificate generation
+  shell: echo subjectAltName = DNS:{{ ansible_default_ipv4.address }},IP:{{ ansible_default_ipv4.address }},IP:127.0.0.1 > extfile.cnf chdir=/etc/docker creates=extfile.cnf
+
+- name: Generate server certificate
+  shell: openssl x509 -req -days 365 -sha256 -in server.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out server.pem -extfile extfile.cnf chdir=/etc/docker creates=server.pem
+
+- name: Generate client csr
+  shell: openssl req -subj "/CN=client" -new -key client-key.pem -out client.csr chdir=/etc/docker creates=client.csr
+
+- name: Prepare extfile for certificate generation
+  shell: echo extendedKeyUsage = clientAuth > extfile.cnf chdir=/etc/docker
+
+- name: Generate client certificate
+  shell: openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out client.pem -extfile extfile.cnf chdir=/etc/docker creates=client.pem
+
+- name: Fetch client certificates
+  fetch: src=/etc/docker/{{ item }} dest=certs/docker/{{ inventory_hostname }}/{{ item }} flat=yes
+  with_items:
+    - ca.pem
+    - client-key.pem
+    - client.pem

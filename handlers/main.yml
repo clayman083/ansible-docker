@@ -1,0 +1,5 @@
+---
+
+- name: restart docker
+  systemd: state=restarted daemon_reload=yes name=crond
+  listen: "restart docker service"
