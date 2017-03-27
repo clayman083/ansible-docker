@@ -6,6 +6,7 @@
     - apt-transport-https
     - ca-certificates
     - openssl
+    - python-pip
 
 - name: Add docker.io repo
   apt_repository: repo='deb https://apt.dockerproject.org/repo debian-jessie main' state=present
