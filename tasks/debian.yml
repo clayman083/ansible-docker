@@ -22,7 +22,7 @@
 - name: Install python library
   pip: name=docker-py version=1.9.0
 
-- include: certs.yml
+- import_tasks: certs.yml
 
 - name: Create systemd config
   template: src=docker.service.j2 dest=/etc/systemd/system/docker.service mode=0644
