@@ -5,6 +5,7 @@
     name:
       - apt-transport-https
       - ca-certificates
+      - python-pip
     update_cache: yes
 
 - name: Add repo key
@@ -18,8 +19,18 @@
 - name: Install docker
   apt: name=docker-ce update_cache=yes force=yes
 
-- apt: name=python-docker
-
 - name: Assemble daemon config
   template: src=daemon.json.j2 dest=/etc/docker/daemon.json
   notify: "restart docker service"
+
+- name: Install python library
+  pip: name=docker
+
+- name: Download docker-compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.21.2/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture }}"
+    dest: /usr/local/bin/docker-compose
+    mode: u=rwx,g=rx,o=rx
+    owner: root
+    group: root
+    checksum: sha256:8a11713e11ed73abcb3feb88cd8b5674b3320ba33b22b2ba37915b4ecffdf042
