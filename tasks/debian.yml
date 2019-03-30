@@ -1,12 +1,11 @@
 ---
 
 - name: Install required packages
-  apt: name={{ item }} update_cache=yes state=installed force=yes
-  with_items:
-    - apt-transport-https
-    - ca-certificates
-    - openssl
-    - python-pip
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+    update_cache: yes
 
 - name: Add repo key
   apt_key:
@@ -17,23 +16,10 @@
   apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable' state=present
 
 - name: Install docker
-  apt: name=docker-ce update_cache=yes state=installed force=yes
+  apt: name=docker-ce update_cache=yes force=yes
 
-- name: Remove docker rc
-  file: path=/etc/init.d/docker state=absent
+- apt: name=python-docker
 
-- name: Create folder for containers logs
-  file: path=/var/log/containers/ state=directory
-
-- apt: name={{ item }} state=installed
-  with_items:
-    - python-docker
-
-# - name: Install python library
-#   pip: name=docker-py version=1.9.0
-
-- import_tasks: certs.yml
-
-- name: Create systemd config
-  template: src=docker.service.j2 dest=/etc/systemd/system/docker.service mode=0644
+- name: Assemble daemon config
+  template: src=daemon.json.j2 dest=/etc/docker/daemon.json
   notify: "restart docker service"
