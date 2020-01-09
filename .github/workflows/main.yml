@@ -10,17 +10,16 @@ on:
 jobs:
   run_tests:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8]
-
     steps:
       - uses: actions/checkout@master
 
-      - name: Install dependencies and run tests
-        run: |
-          python3 -m pip install --no-cache-dir --quiet -U pip
-          python3 -m pip install --no-cache-dir --quiet wheel
-          python3 -m pip install --no-cache-dir --quiet ansible docker
-          python3 -m pip install --no-cache-dir --quiet --user molecule
-          python3 -m molecule test
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+
+      - name: Install requirements
+        run: pip install tox
+
+      - name: Run tests
+        run: tox
