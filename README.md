@@ -1,6 +1,8 @@
 Docker
 =========
 
+[![Build Status](https://github.com/clayman74/ansible-docker/workflows/Tests/badge.svg)](https://github.com/clayman74/ansible-docker)
+
 This role installs and configures the Docker.
 
 Requirements

@@ -11,7 +11,7 @@ driver:
 
 platforms:
   - name: instance
-    image: "clayman083/docker-${MOLECULE_DISTRO:-debian10}-ansible:latest"
+    image: "clayman083/docker-${MOLECULE_DISTRO:-debian10}-ansible:v1.0.0"
     privileged: true
     pre_build_image: true
     command: ${MOLECULE_DOCKER_COMMAND:-""}
