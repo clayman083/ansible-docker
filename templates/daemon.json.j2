@@ -1,4 +1,9 @@
 {
     "experimental": true,
-    "metrics-addr": "{{ metrics.host }}:{{ metrics.port }}"
+    "metrics-addr": "{{ metrics.host }}:{{ metrics.port }}",
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "10m",
+        "max-file": "3"
+    }
 }
