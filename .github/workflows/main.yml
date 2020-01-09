@@ -10,11 +10,15 @@ on:
 jobs:
   run_tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+
     steps:
       - uses: actions/checkout@master
 
       - name: Install dependencies
-        run: pip install ansible molecule docker
-
-      - name: Run tests
-        run: molecule test
+        run: |
+          pip install wheel
+          pip install ansible docker molecule
+          molecule test
