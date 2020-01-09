@@ -1,0 +1,13 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  roles:
+    - role: docker
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - curl

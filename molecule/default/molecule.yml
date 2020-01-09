@@ -1,0 +1,40 @@
+---
+
+dependency:
+  name: galaxy
+
+lint:
+  name: yamllint
+
+driver:
+  name: docker
+
+platforms:
+  - name: instance
+    image: "clayman083/docker-${MOLECULE_DISTRO:-debian10}-ansible:latest"
+    privileged: true
+    pre_build_image: true
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      # - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    capabilities:
+      - SYS_ADMIN
+    groups:
+      - debian
+
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+
+  inventory:
+    host_vars:
+      # setting for the platform instance named 'instance'
+      instance:
+        ansible_user: ansible
+
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
