@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: Install dependencies
+      - name: Install dependencies and run tests
         run: |
           pip install --no-cache-dir --quiet -U pip
           pip install --no-cache-dir --quiet wheel
