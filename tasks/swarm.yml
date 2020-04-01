@@ -1,0 +1,85 @@
+---
+
+- name: Init a new swarm
+  docker_swarm:
+    state: present
+    advertise_addr: "{{ private_network['address'] }}"
+  register: swarm_info
+  when: swarm_manager|default(False) and swarm_master|default(False)
+
+- name: Prepare folders
+  file: path="{{ item }}" state=directory
+  with_items:
+    - "{{ swarm_tokens_path }}"
+  delegate_to: localhost
+  become: false
+  when: swarm_manager|default(False) and swarm_master|default(False)
+
+- name: Prepare token files
+  file: state=touch path={{ item }}
+  with_items:
+    - "{{ swarm_tokens_path }}/manager.token"
+    - "{{ swarm_tokens_path }}/worker.token"
+  delegate_to: localhost
+  become: false
+  when: swarm_manager|default(False) and swarm_master|default(False)
+
+- name: Save tokens
+  lineinfile:
+    state: present
+    create: yes
+    dest: "{{ item.dest }}"
+    line: "{{ item.token }}"
+  with_items:
+    - token: "{{ swarm_info.swarm_facts.JoinTokens.Manager }}"
+      dest: "{{ swarm_tokens_path }}/manager.token"
+    - token: "{{ swarm_info.swarm_facts.JoinTokens.Worker }}"
+      dest: "{{ swarm_tokens_path }}/worker.token"
+  delegate_to: localhost
+  become: false
+  when: swarm_manager|default(False) and swarm_master|default(False)
+
+
+- name: Join managers
+  docker_swarm:
+    state: join
+    advertise_addr: "{{ private_network['address'] }}"
+    join_token: "{{ lookup('file', '{{ credentials_path }}/services/swarm/worker.token') }}"
+    remote_addrs: "{{ swarm_remote_addrs }}"
+  when: swarm_manager|default(False) and not swarm_master|default(False)
+
+- name: Promote managers
+  docker_node:
+    hostname: "{{ ansible_hostname }}"
+    role: manager
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['swarm-master'] }}"
+  when: swarm_manager|default(False) and not swarm_master|default(False)
+
+
+- name: Join workers
+  docker_swarm:
+    state: join
+    advertise_addr: "{{ private_network['address'] }}"
+    join_token: "{{ lookup('file', '{{ credentials_path }}/services/swarm/worker.token') }}"
+    remote_addrs: "{{ swarm_remote_addrs }}"
+  when: swarm_worker|default(False)
+
+
+- name: Set node labels
+  docker_node:
+    hostname: "{{ ansible_hostname }}"
+    labels: "{{ swarm_node_labels }}"
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['swarm-master'] }}"
+  when: swarm_node_labels|default(False)
+
+
+- name: Create swarm networks
+  docker_network:
+    name: "{{ item['name'] }}"
+    attachable: "{{ item['attachable']|default(False) }}"
+    driver: "{{ item['driver']|default('bridge') }}"
+    ipam_config: "{{ item['ipam_config']|default([]) }}"
+  with_items: "{{ swarm_networks|default([]) }}"
+  when: swarm_manager|default(False) and swarm_master|default(False)

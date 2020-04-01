@@ -24,12 +24,12 @@
 
 - name: Download docker-compose
   get_url:
-    url: "https://github.com/docker/compose/releases/download/1.25.1/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture }}"
+    url: "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture }}"
     dest: /usr/local/bin/docker-compose
     mode: u=rwx,g=rx,o=rx
     owner: root
     group: root
-    checksum: sha256:5df53b57bba0ad83af69f0f39c15f0316626302aba876954ea842892c875dd6a
+    checksum: sha256:542e93b1d5106d2769b325f60ba9a0ba087bb96e30dc2c1cb026f0cb642e9aed
 
 - name: Prepare folder for configs
   file: state=directory path=/etc/docker
